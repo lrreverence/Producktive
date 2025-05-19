@@ -266,14 +266,20 @@ const Home = () => {
           </div>
 
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {notes.map((note) => (
-              <NoteCard
-                key={note._id}
-                note={note}
-                onEdit={handleEditNote}
-                onDelete={handleDeleteNote}
-              />
-            ))}
+            {notes.length === 0 ? (
+              <div className="col-span-full text-center py-10">
+                <p className="text-gray-500">No notes available. Add a new note to get started!</p>
+              </div>
+            ) : (
+              notes.map((note) => (
+                <NoteCard
+                  key={note._id}
+                  note={note}
+                  onEdit={handleEditNote}
+                  onDelete={handleDeleteNote}
+                />
+              ))
+            )}
           </div>
         </div>
       </main>
