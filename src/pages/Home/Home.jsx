@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from '../../components/NavBar/Navbar';
+import { getAllNotes, addNote, editNote, deleteNote } from '../../api';
 
 const NoteCard = ({ note, onEdit, onDelete }) => {
   return (
@@ -16,7 +17,7 @@ const NoteCard = ({ note, onEdit, onDelete }) => {
             </svg>
           </button>
           <button
-            onClick={() => onDelete(note.id)}
+            onClick={() => onDelete(note._id)}
             className="text-gray-500 hover:text-red-600"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -186,22 +187,21 @@ const AddEditNotePopup = ({ note, onClose, onSave }) => {
 };
 
 const Home = () => {
-  const [notes, setNotes] = useState([
-    {
-      id: 1,
-      title: 'Meeting Notes',
-      content: 'Discuss project timeline and deliverables',
-      tags: ['work', 'meeting'],
-    },
-    {
-      id: 2,
-      title: 'Shopping List',
-      content: 'Milk, eggs, bread, and vegetables',
-      tags: ['personal', 'shopping'],
-    },
-  ]);
+  const [notes, setNotes] = useState([]);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [editingNote, setEditingNote] = useState(null);
+
+  useEffect(() => {
+    const fetchNotes = async () => {
+      try {
+        const response = await getAllNotes();
+        setNotes(response.notes);
+      } catch (error) {
+        console.error('Error fetching notes:', error);
+      }
+    };
+    fetchNotes();
+  }, []);
 
   const handleAddNote = () => {
     setEditingNote(null);
@@ -213,15 +213,27 @@ const Home = () => {
     setIsPopupOpen(true);
   };
 
-  const handleDeleteNote = (noteId) => {
-    setNotes(notes.filter((note) => note.id !== noteId));
+  const handleDeleteNote = async (noteId) => {
+    try {
+      await deleteNote(noteId);
+      const response = await getAllNotes();
+      setNotes(response.notes);
+    } catch (error) {
+      console.error('Error deleting note:', error);
+    }
   };
 
-  const handleSaveNote = (noteData) => {
-    if (editingNote) {
-      setNotes(notes.map((note) => (note.id === editingNote.id ? { ...note, ...noteData } : note)));
-    } else {
-      setNotes([...notes, { id: Date.now(), ...noteData }]);
+  const handleSaveNote = async (noteData) => {
+    try {
+      if (editingNote) {
+        await editNote(editingNote._id, noteData);
+      } else {
+        await addNote(noteData);
+      }
+      const response = await getAllNotes();
+      setNotes(response.notes);
+    } catch (error) {
+      console.error('Error saving note:', error);
     }
     setIsPopupOpen(false);
   };
@@ -256,7 +268,7 @@ const Home = () => {
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {notes.map((note) => (
               <NoteCard
-                key={note.id}
+                key={note._id}
                 note={note}
                 onEdit={handleEditNote}
                 onDelete={handleDeleteNote}

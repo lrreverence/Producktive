@@ -1,35 +1,51 @@
-import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import Login from './pages/Login/Login';
 import Signup from './pages/SignUp/Signup';
 import Home from './pages/Home/Home';
 import Dashboard from './pages/Dashboard/Dashboard';
 
-const App = () => {
-  // TODO: Add proper authentication check
-  const isAuthenticated = true; // Temporarily set to true for testing
-
-  return (
-    <Routes>
-      <Route
-        path="/login"
-        element={isAuthenticated ? <Navigate to="/" replace /> : <Login />}
-      />
-      <Route
-        path="/signup"
-        element={isAuthenticated ? <Navigate to="/" replace /> : <Signup />}
-      />
-      <Route
-        path="/"
-        element={isAuthenticated ? <Home /> : <Navigate to="/login" replace />}
-      />
-      <Route
-        path="/dashboard"
-        element={isAuthenticated ? <Dashboard /> : <Navigate to="/login" replace />}
-      />
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
-  );
+// Protected Route component
+const ProtectedRoute = ({ children }) => {
+  const { user, loading } = useAuth();
+  
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+  
+  if (!user) {
+    return <Navigate to="/login" />;
+  }
+  
+  return children;
 };
+
+function App() {
+  return (
+    <AuthProvider>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <Home />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </AuthProvider>
+  );
+}
 
 export default App;

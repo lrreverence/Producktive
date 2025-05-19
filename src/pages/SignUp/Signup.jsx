@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import PasswordInput from '../../components/Input/PasswordInput';
+import { useAuth } from '../../context/AuthContext';
 
 const Signup = () => {
   const navigate = useNavigate();
+  const { signup } = useAuth();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -11,10 +13,22 @@ const Signup = () => {
     confirmPassword: '',
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // TODO: Implement signup logic
-    console.log('Signup attempt:', formData);
+    if (formData.password !== formData.confirmPassword) {
+      alert('Passwords do not match');
+      return;
+    }
+    try {
+      await signup({
+        fullName: formData.name,
+        email: formData.email,
+        password: formData.password,
+      });
+      navigate('/');
+    } catch (error) {
+      alert(error.error || 'Signup failed');
+    }
   };
 
   return (
