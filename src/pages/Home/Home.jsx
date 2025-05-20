@@ -6,26 +6,31 @@ import { useLocation } from 'react-router-dom';
 const NoteCard = ({ note, onEdit, onDelete, onTogglePin }) => {
   return (
     <div
-      className="break-inside-avoid mb-4 bg-white dark:bg-[#28292c] text-gray-900 dark:text-gray-100 rounded-xl shadow-md hover:shadow-xl transition-shadow duration-200 cursor-pointer border border-gray-100 dark:border-gray-700 p-4 min-h-[120px]"
+      className="break-inside-avoid mb-4 bg-white dark:bg-[#28292c] text-gray-900 dark:text-gray-100 rounded-xl shadow-md hover:shadow-xl transition-shadow duration-900 cursor-pointer border border-gray-100 dark:border-gray-700 p-4 min-h-[120px] note-card"
       onClick={() => onEdit(note)}
     >
       <div className="flex justify-between items-start mb-2">
-        <h3 className="text-base font-medium text-gray-900 dark:text-gray-100 break-words pr-2">{note.title}</h3>
-        <div className="flex space-x-1">
+        <h3 className="text-base font-medium text-gray-900 dark:text-gray-100 break-words pr-2 flex-1 truncate">{note.title}</h3>
+        <div className="flex space-x-1 flex-shrink-0">
           <button
-            onClick={e => { e.stopPropagation(); onTogglePin(note); }}
-            className={note.isPinned ? "text-yellow-500" : "text-gray-400 hover:text-yellow-500 dark:text-gray-500 dark:hover:text-yellow-400"}
+            onClick={e => { 
+              e.preventDefault();
+              e.stopPropagation(); 
+              onTogglePin(note); 
+            }}
+            className={`${note.isPinned ? "text-yellow-500" : "text-gray-400"} hover:text-yellow-500 dark:hover:text-yellow-400 transition-colors duration-200`}
             title={note.isPinned ? "Unpin Note" : "Pin Note"}
           >
-            {note.isPinned ? (
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                <path d="M8.75 2a.75.75 0 01.75.75V4a4 4 0 013.25 3.92v2.34l1.6 1.6a.75.75 0 01-.53 1.28H13v2.25a.75.75 0 01-1.5 0V13H8.5v2.25a.75.75 0 01-1.5 0V13H5.18a.75.75 0 01-.53-1.28l1.6-1.6V7.92A4 4 0 019.5 4V2.75A.75.75 0 018.75 2z" />
-              </svg>
-            ) : (
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M8.75 2a.75.75 0 01.75.75V4a4 4 0 013.25 3.92v2.34l1.6 1.6a.75.75 0 01-.53 1.28H13v2.25a.75.75 0 01-1.5 0V13H8.5v2.25a.75.75 0 01-1.5 0V13H5.18a.75.75 0 01-.53-1.28l1.6-1.6V7.92A4 4 0 019.5 4V2.75A.75.75 0 018.75 2z" />
-              </svg>
-            )}
+            <img
+              src="/pin.svg"
+              alt={note.isPinned ? "Pinned" : "Unpinned"}
+              className={`h-5 w-5 ${note.isPinned ? 'filter-yellow' : 'filter-gray'} transition-all duration-200`}
+              style={{ 
+                filter: note.isPinned 
+                  ? 'invert(62%) sepia(98%) saturate(748%) hue-rotate(1deg) brightness(104%) contrast(101%)' 
+                  : 'invert(60%) sepia(0%) saturate(0%) hue-rotate(180deg) brightness(90%) contrast(90%)'
+              }}
+            />
           </button>
           <button
             onClick={e => { e.stopPropagation(); onEdit(note); }}
@@ -45,7 +50,9 @@ const NoteCard = ({ note, onEdit, onDelete, onTogglePin }) => {
           </button>
         </div>
       </div>
-      <p className="text-gray-700 dark:text-gray-300 text-sm mb-3 break-words">{note.content}</p>
+      <pre className="text-gray-700 dark:text-gray-300 text-sm mb-3 break-words whitespace-pre-wrap font-sans">
+        {note.content.length > 500 ? note.content.slice(0, 500) + '...' : note.content}
+      </pre>
       <div className="flex flex-wrap gap-1">
         {note.tags.map((tag) => (
           <span
@@ -93,25 +100,24 @@ const AddEditNotePopup = ({ note, onClose, onSave }) => {
 
   return (
     <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full p-6">
+      <div className="bg-white dark:bg-[#232326] dark:text-gray-100 rounded-lg shadow-xl max-w-2xl w-full p-6 min-h-[600px] flex flex-col">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold text-gray-900">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
             {note ? 'Edit Note' : 'Add New Note'}
           </h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-500"
+            className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
           >
             <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </div>
-
-        <form onSubmit={handleSubmit}>
-          <div className="space-y-4">
+        <form onSubmit={handleSubmit} className="flex-1 flex flex-col">
+          <div className="space-y-4 flex-1 flex flex-col">
             <div>
-              <label htmlFor="title" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="title" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
                 Title
               </label>
               <input
@@ -119,40 +125,38 @@ const AddEditNotePopup = ({ note, onClose, onSave }) => {
                 id="title"
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-[#232326] dark:text-gray-100 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                 required
               />
             </div>
-
-            <div>
-              <label htmlFor="content" className="block text-sm font-medium text-gray-700">
+            <div className="flex-1 flex flex-col">
+              <label htmlFor="content" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
                 Content
               </label>
               <textarea
                 id="content"
-                rows={4}
+                rows={12}
                 value={formData.content}
                 onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-[#232326] dark:text-gray-100 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm min-h-[300px]"
                 required
               />
             </div>
-
             <div>
-              <label htmlFor="tags" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="tags" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
                 Tags
               </label>
               <div className="mt-1 flex flex-wrap gap-2">
                 {formData.tags.map((tag) => (
                   <span
                     key={tag}
-                    className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                    className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200"
                   >
                     {tag}
                     <button
                       type="button"
                       onClick={(e) => { e.stopPropagation(); handleRemoveTag(tag); }}
-                      className="ml-1 inline-flex items-center p-0.5 rounded-full text-blue-400 hover:bg-blue-200 hover:text-blue-500"
+                      className="ml-1 inline-flex items-center p-0.5 rounded-full text-blue-400 hover:bg-blue-200 hover:text-blue-500 dark:hover:bg-blue-800"
                     >
                       <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
                         <path
@@ -170,7 +174,7 @@ const AddEditNotePopup = ({ note, onClose, onSave }) => {
                   type="text"
                   value={tagInput}
                   onChange={(e) => setTagInput(e.target.value)}
-                  className="block w-full rounded-l-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                  className="block w-full rounded-l-md border-gray-300 dark:border-gray-600 dark:bg-[#232326] dark:text-gray-100 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                   placeholder="Add a tag"
                 />
                 <button
@@ -183,12 +187,11 @@ const AddEditNotePopup = ({ note, onClose, onSave }) => {
               </div>
             </div>
           </div>
-
           <div className="mt-6 flex justify-end space-x-3">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-[#232326] hover:bg-gray-50 dark:hover:bg-[#232326]/80 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
               Cancel
             </button>
@@ -286,16 +289,16 @@ const Home = () => {
         <div className="relative">
           <button
             onClick={handleAddNote}
-            className="fixed z-20 bottom-8 right-8 bg-yellow-400 hover:bg-yellow-500 text-white rounded-full shadow-lg w-16 h-16 flex items-center justify-center text-3xl transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-yellow-300 dark:bg-yellow-500 dark:hover:bg-yellow-400 dark:focus:ring-yellow-600"
-            title="Add Note"
+            className="w-1/2 mx-auto flex items-center bg-[#232326] dark:bg-[#232326] border border-gray-500/40 rounded-2xl px-6 py-4 mb-8 shadow-md hover:shadow-lg transition-shadow duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            style={{ minHeight: '48px', justifyContent: 'flex-start' }}
           >
-            <svg className="h-8 w-8" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-            </svg>
+            <span className="text-base text-gray-300 font-semibold">Take a note...</span>
           </button>
-          <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-100 mb-6">
-            {searchResults ? `Search Results for "${searchQuery}"` : 'My Notes'}
-          </h1>
+          {searchResults && (
+            <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-100 mb-6">
+              {`Search Results for "${searchQuery}"`}
+            </h1>
+          )}
           {pinnedNotes.length > 0 && (
             <>
               <h2 className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2 pl-1 tracking-widest uppercase">Pinned</h2>

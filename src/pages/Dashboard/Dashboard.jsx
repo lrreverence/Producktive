@@ -1,18 +1,14 @@
 import React from 'react';
 import Navbar from '../../components/NavBar/Navbar';
+import { useAuth } from '../../context/AuthContext';
 
 const Dashboard = () => {
-  // TODO: Replace with actual user data from authentication
-  const userData = {
-    name: 'John Doe',
-    email: 'john@example.com',
-    joinDate: 'January 2024',
-    totalNotes: 15,
-    recentActivity: [
-      { type: 'Created', note: 'Meeting Notes', time: '2 hours ago' },
-      { type: 'Updated', note: 'Shopping List', time: '5 hours ago' },
-      { type: 'Deleted', note: 'Old Task', time: '1 day ago' },
-    ],
+  const { user } = useAuth();
+
+  // Format the join date to be more readable
+  const formatJoinDate = (date) => {
+    if (!date) return 'Recently';
+    return new Date(date).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
   };
 
   return (
@@ -24,15 +20,21 @@ const Dashboard = () => {
             {/* Profile Header */}
             <div className="px-4 py-5 sm:px-6 border-b border-gray-200">
               <div className="flex items-center">
-                <img
-                  className="h-16 w-16 rounded-full"
-                  src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-                  alt=""
-                />
+                {user?.avatar ? (
+                  <img
+                    className="h-16 w-16 rounded-full"
+                    src={user.avatar}
+                    alt=""
+                  />
+                ) : (
+                  <div className="h-16 w-16 rounded-full bg-blue-500 flex items-center justify-center text-white text-2xl font-medium">
+                    {(user?.fullName || user?.name || '?')[0].toUpperCase()}
+                  </div>
+                )}
                 <div className="ml-4">
-                  <h3 className="text-lg leading-6 font-medium text-gray-900">{userData.name}</h3>
-                  <p className="text-sm text-gray-500">{userData.email}</p>
-                  <p className="text-sm text-gray-500">Member since {userData.joinDate}</p>
+                  <h3 className="text-lg leading-6 font-medium text-gray-900">{user?.fullName || user?.name}</h3>
+                  <p className="text-sm text-gray-500">{user?.email}</p>
+                  <p className="text-sm text-gray-500">Member since {formatJoinDate(user?.createdAt)}</p>
                 </div>
               </div>
             </div>
@@ -43,7 +45,7 @@ const Dashboard = () => {
                 <div className="bg-white overflow-hidden shadow rounded-lg">
                   <div className="px-4 py-5 sm:p-6">
                     <dt className="text-sm font-medium text-gray-500 truncate">Total Notes</dt>
-                    <dd className="mt-1 text-3xl font-semibold text-gray-900">{userData.totalNotes}</dd>
+                    <dd className="mt-1 text-3xl font-semibold text-gray-900">{user?.totalNotes || 0}</dd>
                   </div>
                 </div>
                 {/* Add more stats cards here */}
@@ -55,10 +57,10 @@ const Dashboard = () => {
               <h3 className="text-lg leading-6 font-medium text-gray-900">Recent Activity</h3>
               <div className="mt-4 flow-root">
                 <ul className="-mb-8">
-                  {userData.recentActivity.map((activity, index) => (
+                  {user?.recentActivity?.map((activity, index) => (
                     <li key={index}>
                       <div className="relative pb-8">
-                        {index !== userData.recentActivity.length - 1 && (
+                        {index !== user.recentActivity.length - 1 && (
                           <span
                             className="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gray-200"
                             aria-hidden="true"
