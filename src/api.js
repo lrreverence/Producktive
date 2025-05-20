@@ -95,4 +95,13 @@ export const updateNotePinned = async (noteId, isPinned) => {
     } catch (error) {
         throw error.response?.data || error.message;
     }
+};
+
+export const searchNotes = async (query) => {
+    try {
+        const response = await api.get(`/search-notes?query=${encodeURIComponent(query)}`);
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || error.message;
+    }
 }; 
